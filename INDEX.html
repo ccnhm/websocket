@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<div id="a"></div>
+<input type="text" id="text"> <input type="button" value="发送" id="btn">
+    <div style="cursor: pointer" onclick="close1()">关闭</div>
+<hr>
+<div id="b"></div>
+<script src="./js/jquery-3.6.0.min.js"></script>
+<script>
+    let i=location.search;
+    //  ?1:2     我是1，我要发给2
+    //  ?1       我是1，要么不发，一发就群发
+    //  ?:2      别管我是谁，我要发给2
+    i=i.replace(/[^\d\?:]/g,'')              //这条是去掉不是数字的，其实有字母也行的
+    let m=i.match(/(?<=\?)[^:]+?(?=:|$)/)    //提取我是谁
+    let u=i.match(/(?<=:).+?$/)              //提取发给谁
+    m=m?m+'，':'谁？'
+    u=u? '我给' + u + '发信息':'我群发'
+    a.innerHTML=('我是'+ m + u)
+    //-----------------------分割线----------------------------------------------
+    let ws =new WebSocket('ws://localhost:3030/'+i)
+    ws.onmessage=(evt)=>{
+        console.log(evt.data)
+        b.innerHTML += (evt.data+'<br>')
+    }
+    ws.onopen=()=>{
+        console.log('连接成功')
+        b.innerHTML += ('连接成功<br>')
+        // ws.send('你好')
+    }
+    ws.onerror=()=>{
+        console.log('连接错误')
+        b.innerHTML += ('连接错误<br>')
+    }
+    ws.onclose=()=>{
+
+        console.log('连接关闭')
+        b.innerHTML += ('连接关闭<br>')
+    }
+    //-----------------------分割线----------------------------------------------
+    btn.onclick=()=>ws.send(text.value? text.value:u)
+    function close1(){
+        ws.close()
+    }
+</script>
+</body>
+</html>
